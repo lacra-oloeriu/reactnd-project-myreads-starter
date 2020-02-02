@@ -1,6 +1,7 @@
 import React from 'react'
 import * as BooksAPI from './BooksAPI'
 import './App.css'
+import BookSelf from './BookSelf'
 
 class BooksApp extends React.Component {
   state = {
@@ -13,21 +14,55 @@ class BooksApp extends React.Component {
      * pages, as well as provide a good URL they can bookmark and share.
      */
     showSearchPage: false,
-    books:[]
+    books: []
   }
-  componentDidMount(){
-    BooksAPI.getAll ()
-    .then((books)=>{
-      this.setState(() =>({
-        books
+
+  componentDidMount() {
+    BooksAPI.getAll()
+      .then((books) => {
+        this.setState(() => ({
+          books
+        })
+        )
       })
-      )
-    })
   }
+
+
+  // groupBy = key => array =>
+  //   array.reduce((objectsByKeyValue, obj) => {
+  //     const value = obj[key];
+  //     objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
+  //     return objectsByKeyValue;
+  //   }, {});
+
+  groupBy(objectArray, property) {
+    return objectArray.reduce(function (acc, obj) {
+      var key = obj[property];
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(obj);
+      return acc;
+    }, {});
+  }
+
 
   render() {
     console.log("My message")
-    console.log (this.state.books)
+    console.log(this.state.books)
+
+    const groupedBooks = this.groupBy(this.state.books, 'shelf')
+    
+    
+    console.log(groupedBooks)
+
+    const shelves = Object.keys(groupedBooks).map(key => {
+      
+      return (
+        <BookSelf shelfKey = {key} />
+      )
+    })
+
     return (
       <div className="app">
         {this.state.showSearchPage ? (
@@ -43,7 +78,7 @@ class BooksApp extends React.Component {
                   However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
                   you don't find a specific author or title. Every search is limited by search terms.
                 */}
-                <input type="text" placeholder="Search by title or author"/>
+                <input type="text" placeholder="Search by title or author" />
 
               </div>
             </div>
@@ -52,18 +87,19 @@ class BooksApp extends React.Component {
             </div>
           </div>
         ) : (
-          <div className="list-books">
-            <div className="list-books-title">
-              <h1>MyReads</h1>
+            <div className="list-books">
+              <div className="list-books-title">
+                <h1>MyReads</h1>
+                <div>{shelves}</div>
+              </div>
+              <div className="list-books-content">
+                Lacra books
             </div>
-            <div className="list-books-content">
-              Lacra books
+              <div className="open-search">
+                <button onClick={() => this.setState({ showSearchPage: true })}>Add a book</button>
+              </div>
             </div>
-            <div className="open-search">
-              <button onClick={() => this.setState({ showSearchPage: true })}>Add a book</button>
-            </div>
-          </div>
-        )}
+          )}
       </div>
     )
   }
